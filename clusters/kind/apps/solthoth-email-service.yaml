@@ -1,0 +1,23 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: solthoth-email-service
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://github.com/solthoth/email-service.git
+  ref:
+    branch: main
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: solthoth-email-service
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  path: ./deploy/overlays/kind
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: solthoth-email-service
