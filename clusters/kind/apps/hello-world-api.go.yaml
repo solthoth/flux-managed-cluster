@@ -1,18 +1,18 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
-  name: solthoth-email-service
+  name: hello-world-api-go
   namespace: flux-system
 spec:
   interval: 1m
-  url: https://github.com/solthoth/email-service.git
+  url: https://github.com/solthoth/hello-world-api.go.git
   ref:
     branch: main
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: solthoth-email-service
+  name: hello-world-api-go
   namespace: flux-system
 spec:
   interval: 1m0s
@@ -20,4 +20,4 @@ spec:
   prune: true
   sourceRef:
     kind: GitRepository
-    name: solthoth-email-service
+    name: hello-world-api-go
