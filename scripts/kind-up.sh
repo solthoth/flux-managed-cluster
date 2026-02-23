@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CLUSTER_NAME="${CLUSTER_NAME:-stellarus-poc}"
+CLUSTER_NAME="${CLUSTER_NAME:-solthoth-poc}"
 CONFIG_PATH="${CONFIG_PATH:-clusters/kind/kind-config.yaml}"
 
 echo ">> Creating kind cluster: ${CLUSTER_NAME}"

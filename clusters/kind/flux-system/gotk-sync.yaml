@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1m
-  url: https://github.com/stellarus-demo-sandbox/flux-managed-cluster.git
+  url: https://github.com/solthoth/flux-managed-cluster.git
   ref:
     branch: main
 ---

@@ -1,4 +1,4 @@
-CLUSTER_NAME ?= stellarus-poc
+CLUSTER_NAME ?= solthoth-poc
 CONFIG_PATH  ?= clusters/kind/kind-config.yaml
 
 .PHONY: kind-up kind-down kube-check
