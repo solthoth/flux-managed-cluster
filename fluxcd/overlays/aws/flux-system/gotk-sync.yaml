@@ -12,11 +12,11 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-kind
+  name: cluster-aws
   namespace: flux-system
 spec:
   interval: 5m
-  path: ./clusters/kind
+  path: ./fluxcd/overlays/aws
   prune: true
   sourceRef:
     kind: GitRepository
