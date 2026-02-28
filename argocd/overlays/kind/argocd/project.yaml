@@ -1,0 +1,16 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: kind-cluster
+  namespace: argocd
+spec:
+  description: Project for the kind local development cluster
+  sourceRepos:
+    - 'https://github.com/solthoth/*.git'
+  destinations:
+    - namespace: '*'
+      server: 'https://kubernetes.default.svc'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
