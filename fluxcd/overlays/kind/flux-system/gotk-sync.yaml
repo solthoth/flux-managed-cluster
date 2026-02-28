@@ -16,7 +16,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 5m
-  path: ./clusters/kind
+  path: ./fluxcd/overlays/kind
   prune: true
   sourceRef:
     kind: GitRepository
