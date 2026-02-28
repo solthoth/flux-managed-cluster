@@ -3,5 +3,3 @@ kind: Kustomization
 
 resources:
   - flux-system
-  - argocd
-  - apps/overlays
