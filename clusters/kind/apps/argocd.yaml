@@ -1,7 +1,7 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
-  name: flux-managed-cluster
+  name: argocd
   namespace: flux-system
 spec:
   interval: 1m
