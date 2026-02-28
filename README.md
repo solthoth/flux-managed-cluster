@@ -1,61 +1,147 @@
 # Flux Managed Cluster
 
-This repository creates a kind cluster and installs flux-cd to manage GitRepositories.
+A GitOps-driven cluster template that uses **FluxCD** as the cluster operator to bootstrap and manage **ArgoCD**, which in turn handles application deployments. Supports multiple target environments (kind, AWS, Azure) through a shared base + overlay pattern.
 
-# Getting Started
+---
+
+## How It Works
+
+```
+GitHub Repo
+    │
+    ▼
+FluxCD (cluster operator)
+    ├── Installs itself      → fluxcd/overlays/<env>/
+    ├── Installs ArgoCD      → argocd/overlays/<env>/
+    └── Deploys app sources  → apps/overlays/<env>/
+                                    │
+                                    ▼
+                              ArgoCD (app operator)
+                                    └── Deploys applications
+```
+
+Flux watches this repository and reconciles all resources automatically. Any change pushed to `main` is applied to the cluster within minutes.
+
+---
 
 ## Prerequisites
 
-- Docker Desktop
-- kind
-- kubectl
-- kustomize
-- Flux
-- Make
+| Tool | Purpose |
+|---|---|
+| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Container runtime |
+| [kind](https://kind.sigs.k8s.io/) | Local Kubernetes cluster |
+| [kubectl](https://kubernetes.io/docs/tasks/tools/) | Kubernetes CLI |
+| [kustomize](https://kustomize.io/) | Manifest templating |
+| [flux](https://fluxcd.io/flux/installation/) | FluxCD CLI |
 
-### Mac OS Setup
-
-Using homebrew
+### Install on macOS (Homebrew)
 
 ```zsh
-brew install kind kubectl kustomize make
+brew install kind kubectl kustomize
 brew install --cask docker-desktop
 brew install fluxcd/tap/flux
 ```
 
-## Starting Up the Cluster
+---
 
-Using the Makefile run the following command:
+## Getting Started (kind)
+
+### 1. Start the cluster
 
 ```zsh
 make kind-up
 ```
 
-The kind cluster configuration is located at `./clusters/kind/kind-config.yaml`.
+The kind cluster configuration is at [clusters/kind/kind-config.yaml](clusters/kind/kind-config.yaml).
 
-Once the cluster is up and running, apply the flux-cd configuration using kustomize.
+### 2. Bootstrap Flux
 
 ```zsh
-kubectl apply -k clusters/kind/flux-system
+kubectl apply -k fluxcd/overlays/kind/flux-system
 ```
 
-Once FluxCD is up and running, it will automatically install and configure ArgoCD.
-In order to access first setup port forward for local access.
+This installs the Flux controllers and creates the `GitRepository` and `Kustomization` resources that point back at this repo. From this point Flux manages everything else automatically.
+
+### 3. Verify Flux is reconciling
+
+```zsh
+flux get kustomizations
+```
+
+All kustomizations should eventually show `True` in the `READY` column. Flux will install ArgoCD and register any configured app sources.
+
+### 4. Access ArgoCD
+
+Set up port forwarding:
 
 ```zsh
 kubectl -n argocd port-forward svc/argocd-server 8080:443
 ```
 
-Extract the password for local access
+Retrieve the initial admin password:
 
 ```zsh
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d; echo
 ```
 
-# Project Understanding
+Open [https://localhost:8080](https://localhost:8080) and log in with username `admin`.
 
-FluxCD is acting as the orchestrator to deploy changes from remote repositories. `clusters/kind/flux-system` maintains the configuration of Flux, and reconciles itself in the event of changes.
+---
 
-## Adding Additional Repositories
+## Repository Structure
 
-Within the `clusters/kind` folder is an `apps` folder. Here are the manifests of all applications of type `Kind:GitRepository`. This tells FluxCD to pull the repositories defined in here for aorchestration.
+```text
+flux-managed-cluster/
+│
+├── fluxcd/                   # Flux bootstrap configuration
+│   ├── base/                 # Shared Flux resources (GitRepositories, Kustomizations)
+│   └── overlays/
+│       ├── kind/             # kind-specific Flux config
+│       ├── aws/
+│       └── azure/
+│
+├── argocd/                   # ArgoCD installation manifests
+│   ├── base/                 # (reserved for shared ArgoCD config)
+│   └── overlays/
+│       ├── kind/             # kind-specific ArgoCD install
+│       ├── aws/
+│       └── azure/
+│
+├── apps/                     # Application sources managed by Flux
+│   ├── base/                 # GitRepository definitions for each app
+│   └── overlays/
+│       └── kind/             # kind-specific Kustomizations pointing to app repos
+│
+└── clusters/                 # Cluster-level configuration (e.g. kind-config.yaml)
+    └── kind/
+```
+
+### Base + Overlays Pattern
+
+Each top-level component (`fluxcd/`, `argocd/`, `apps/`) follows the same Kustomize layout:
+
+- **`base/`** — environment-agnostic resource definitions shared across all targets
+- **`overlays/<env>/`** — environment-specific patches and additions that extend the base
+
+This avoids duplicating manifests across environments while still allowing per-environment customization.
+
+---
+
+## Adding a New Application
+
+1. Add a `GitRepository` source for the app in [apps/base/](apps/base/).
+2. Add a `Kustomization` CR in the relevant overlay (e.g. [apps/overlays/kind/](apps/overlays/kind/)) pointing to the deployment path in the app's repo.
+3. Reference the new files in the respective `kustomization.yaml`.
+
+Flux will pick up the changes and apply them within the next reconciliation interval.
+
+---
+
+## Supported Environments
+
+| Environment | Overlay path |
+|---|---|
+| kind (local) | `fluxcd/overlays/kind/` |
+| AWS | `fluxcd/overlays/aws/` |
+| Azure | `fluxcd/overlays/azure/` |
