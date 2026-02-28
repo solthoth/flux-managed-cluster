@@ -5,3 +5,4 @@ resources:
   - flux-managed-cluster.yaml
   - argocd.yaml
   - apps.yaml
+  - crossplane.yaml

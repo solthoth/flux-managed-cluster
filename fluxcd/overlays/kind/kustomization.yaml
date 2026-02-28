@@ -8,3 +8,4 @@ resources:
 patches:
   - path: argocd.yaml
   - path: apps.yaml
+  - path: crossplane.yaml
