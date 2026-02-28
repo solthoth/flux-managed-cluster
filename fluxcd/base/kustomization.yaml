@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - flux-managed-cluster.yaml
   - argocd.yaml
+  - apps.yaml
