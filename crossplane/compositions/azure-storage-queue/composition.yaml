@@ -131,10 +131,10 @@ spec:
       connectionDetails:
         - type: FromConnectionSecretKey
           name: primaryAccessKey
-          fromConnectionSecretKey: primaryAccessKey
+          fromConnectionSecretKey: attribute.primary_access_key
         - type: FromConnectionSecretKey
           name: primaryQueueConnectionString
-          fromConnectionSecretKey: primaryQueueConnectionString
+          fromConnectionSecretKey: attribute.primary_connection_string
 
     # ── 3. Storage Queue ──────────────────────────────────────────────────────
     - name: storage-queue
