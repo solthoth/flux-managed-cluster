@@ -1,0 +1,27 @@
+---
+# Applies the Crossplane StorageQueue claim from the hello-world-api-go app repo.
+# The app's claim has no namespace set, so we inject it here via a patch.
+# The connection secret (hello-world-api-queue-conn) will be written to the app's namespace.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: hello-world-api-go-crossplane
+  namespace: flux-system
+spec:
+  interval: 5m0s
+  path: ./deploy/crossplane/base
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: hello-world-api-go
+  dependsOn:
+    - name: crossplane-compositions
+  patches:
+    - patch: |
+        apiVersion: platform.solthoth.io/v1alpha1
+        kind: StorageQueue
+        metadata:
+          name: hello-world-api-queue
+          namespace: app-solthoth-hello-world-api-go
+      target:
+        kind: StorageQueue

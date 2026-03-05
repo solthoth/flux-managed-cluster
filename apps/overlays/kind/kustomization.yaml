@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - ../../base
   - hello-world-api.go.yaml
+  - hello-world-api-go-crossplane.yaml
