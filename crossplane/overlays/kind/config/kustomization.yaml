@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# namespace applies only to namespace-scoped resources (the SOPS-decrypted Secret).
+# ProviderConfig is cluster-scoped and is unaffected by this field.
+namespace: crossplane-system
+
+resources:
+  - azure-sp.enc.yaml   # SOPS-encrypted K8s Secret — decrypted by Flux at apply time
+  - providerconfig.yaml

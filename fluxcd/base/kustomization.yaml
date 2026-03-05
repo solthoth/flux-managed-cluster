@@ -6,3 +6,7 @@ resources:
   - argocd.yaml
   - apps.yaml
   - crossplane.yaml
+  - crossplane-providers.yaml
+  - crossplane-config.yaml
+  - crossplane-compositions.yaml
+  - crossplane-claims.yaml

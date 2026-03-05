@@ -1,0 +1,13 @@
+---
+# Provides Azure Storage managed resource types: Account, Queue, Blob, Container, etc.
+# Verify the latest version at: https://marketplace.upbound.io/providers/upbound/provider-azure-storage
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-azure-storage
+spec:
+  package: xpkg.upbound.io/upbound/provider-azure-storage:v1.9.0
+  installPolicy: Automatic
+  revisionActivationPolicy: Automatic
+  revisionHistoryLimit: 1
+  packagePullPolicy: IfNotPresent

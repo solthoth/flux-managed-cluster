@@ -1,0 +1,71 @@
+---
+# CompositeResourceDefinition: defines the StorageQueue self-service API.
+#
+# App teams create a StorageQueue Claim (namespace-scoped) and Crossplane
+# fulfills it by running the Composition, which creates a dedicated
+# Resource Group, Storage Account, and Queue in Azure.
+#
+# Composite (cluster-scoped):  XStorageQueue / xstoragequeues.platform.solthoth.io
+# Claim (namespace-scoped):    StorageQueue  / storagequeues.platform.solthoth.io
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xstoragequeues.platform.solthoth.io
+spec:
+  group: platform.solthoth.io
+  names:
+    kind: XStorageQueue
+    plural: xstoragequeues
+  claimNames:
+    kind: StorageQueue
+    plural: storagequeues
+  # Keys published to the Claim's writeConnectionSecretToRef secret
+  connectionSecretKeys:
+    - primaryAccessKey
+    - primaryQueueConnectionString
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - parameters
+              properties:
+                parameters:
+                  type: object
+                  required:
+                    - location
+                    - storageAccountName
+                  properties:
+                    location:
+                      type: string
+                      description: "Azure region for all resources (e.g. eastus, westus2)"
+                    storageAccountName:
+                      type: string
+                      description: >
+                        Globally unique Azure Storage Account name.
+                        Must be 3-24 characters, lowercase alphanumeric only (no hyphens).
+                      minLength: 3
+                      maxLength: 24
+                      pattern: "^[a-z0-9]+$"
+                    tier:
+                      type: string
+                      description: "Storage account performance tier"
+                      enum:
+                        - Standard
+                        - Premium
+                      default: Standard
+                    replicationType:
+                      type: string
+                      description: "Storage account replication/redundancy type"
+                      enum:
+                        - LRS
+                        - GRS
+                        - ZRS
+                        - RAGRS
+                      default: LRS

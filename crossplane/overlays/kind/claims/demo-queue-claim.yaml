@@ -1,0 +1,30 @@
+---
+# StorageQueue Claim — self-service interface for the demo-app team.
+#
+# Crossplane fulfills this by running the Composition, which creates:
+#   Azure ResourceGroup:    demo-queue-rg
+#   Azure StorageAccount:   <storageAccountName>   (globally unique name below)
+#   Azure StorageQueue:     demo-queue-queue
+#
+# After the Claim is Ready, the connection secret appears in the demo-app namespace:
+#   kubectl get secret demo-queue-conn -n demo-app
+#
+# IMPORTANT: storageAccountName must be globally unique across all of Azure.
+#            3-24 characters, lowercase alphanumeric only (no hyphens).
+#            Update before committing.
+apiVersion: platform.solthoth.io/v1alpha1
+kind: StorageQueue
+metadata:
+  name: demo-queue
+  namespace: demo-app
+spec:
+  parameters:
+    location: eastus
+    storageAccountName: solthothdemosa78b2c9b06
+    tier: Standard
+    replicationType: LRS
+  writeConnectionSecretToRef:
+    name: demo-queue-conn
+  compositeDeletePolicy: Foreground
+  compositionRef:
+    name: xstoragequeues.platform.solthoth.io

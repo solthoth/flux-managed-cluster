@@ -1,0 +1,25 @@
+---
+# Applies the ProviderConfig and SOPS-encrypted SP credentials secret.
+# Depends on crossplane-providers so the ProviderConfig CRD exists before apply.
+# Decryption is configured here because this is the only Kustomization path
+# that contains encrypted files (azure-sp.enc.yaml).
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: crossplane-config
+  namespace: flux-system
+spec:
+  interval: 5m0s
+  path: ./crossplane/overlays/TENANT/config
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-managed-cluster
+  dependsOn:
+    - name: crossplane-providers
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  wait: true
+  timeout: 10m

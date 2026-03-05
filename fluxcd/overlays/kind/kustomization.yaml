@@ -9,3 +9,7 @@ patches:
   - path: argocd.yaml
   - path: apps.yaml
   - path: crossplane.yaml
+  - path: crossplane-providers.yaml
+  - path: crossplane-config.yaml
+  - path: crossplane-compositions.yaml
+  - path: crossplane-claims.yaml

@@ -1,0 +1,14 @@
+---
+# Core Azure family provider — installs the ProviderConfig CRD and common Azure types.
+# MUST be healthy before provider-azure-resources and provider-azure-storage work.
+# Verify the latest version at: https://marketplace.upbound.io/providers/upbound/provider-family-azure
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-family-azure
+spec:
+  package: xpkg.upbound.io/upbound/provider-family-azure:v1.9.0
+  installPolicy: Automatic
+  revisionActivationPolicy: Automatic
+  revisionHistoryLimit: 1
+  packagePullPolicy: IfNotPresent

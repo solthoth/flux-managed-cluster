@@ -1,0 +1,14 @@
+---
+# Provides the ResourceGroup managed resource kind (azure.upbound.io/v1beta1 ResourceGroup).
+# Required by Compositions that create a per-claim Resource Group.
+# Verify the latest version at: https://marketplace.upbound.io/providers/upbound/provider-azure-resources
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-azure-resources
+spec:
+  package: xpkg.upbound.io/upbound/provider-azure-resources:v1.9.0
+  installPolicy: Automatic
+  revisionActivationPolicy: Automatic
+  revisionHistoryLimit: 1
+  packagePullPolicy: IfNotPresent

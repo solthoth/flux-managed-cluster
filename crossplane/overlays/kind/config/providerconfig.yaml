@@ -1,0 +1,24 @@
+---
+# ProviderConfig wires the azure-sp-creds Secret to all Azure managed resources
+# that reference providerConfigRef.name: default.
+#
+# The azure-sp-creds Secret is created by Flux decrypting azure-sp.enc.yaml (SOPS/age).
+# Encrypt the secret with:
+#
+#   kubectl create secret generic azure-sp-creds \
+#     --namespace=crossplane-system \
+#     --from-literal=credentials='{"clientId":"...","clientSecret":"...","tenantId":"...","subscriptionId":"...","activeDirectoryEndpointUrl":"https://login.microsoftonline.com","resourceManagerEndpointUrl":"https://management.azure.com/","activeDirectoryGraphResourceId":"https://graph.windows.net/","sqlManagementEndpointUrl":"https://management.core.windows.net:8443/","galleryEndpointUrl":"https://gallery.azure.com/","managementEndpointUrl":"https://management.core.windows.net/"}' \
+#     --dry-run=client -o yaml \
+#     | sops --encrypt --input-type=yaml --output-type=yaml /dev/stdin \
+#     > crossplane/overlays/kind/config/azure-sp.enc.yaml
+apiVersion: azure.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: default
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: azure-sp-creds
+      key: credentials

@@ -1,0 +1,188 @@
+---
+# Composition: fulfills XStorageQueue claims.
+#
+# Per claim, creates (in dependency order):
+#   1. ResourceGroup         — azure.upbound.io/v1beta1         (from provider-azure-resources)
+#   2. Account (Storage SA)  — storage.azure.upbound.io/v1beta2 (from provider-azure-storage)
+#   3. Queue                 — storage.azure.upbound.io/v1beta1 (from provider-azure-storage)
+#
+# Naming convention (all derived from claim metadata.name, e.g. "demo-queue"):
+#   ResourceGroup:   demo-queue-rg    (Kubernetes CR name + Azure name)
+#   StorageAccount:  demo-queue-sa    (Kubernetes CR name); Azure name = spec.parameters.storageAccountName
+#   Queue:           demo-queue-queue (Kubernetes CR name + Azure name)
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xstoragequeues.platform.solthoth.io
+  labels:
+    provider: azure
+    service: storage-queue
+spec:
+  compositeTypeRef:
+    apiVersion: platform.solthoth.io/v1alpha1
+    kind: XStorageQueue
+  resources:
+
+    # ── 1. Resource Group ─────────────────────────────────────────────────────
+    - name: resource-group
+      base:
+        apiVersion: azure.upbound.io/v1beta1
+        kind: ResourceGroup
+        spec:
+          forProvider:
+            location: ""        # patched from spec.parameters.location
+          providerConfigRef:
+            name: default
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.location
+          toFieldPath: spec.forProvider.location
+
+        # Kubernetes CR name → "<claim-name>-rg"
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: metadata.name
+          transforms:
+            - type: string
+              string:
+                type: Format
+                fmt: "%s-rg"
+
+        # Azure resource name (external-name) → "<claim-name>-rg"
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: metadata.annotations[crossplane.io/external-name]
+          transforms:
+            - type: string
+              string:
+                type: Format
+                fmt: "%s-rg"
+
+    # ── 2. Storage Account ────────────────────────────────────────────────────
+    - name: storage-account
+      base:
+        apiVersion: storage.azure.upbound.io/v1beta2
+        kind: Account
+        spec:
+          forProvider:
+            location: ""              # patched
+            accountTier: Standard     # patched
+            accountReplicationType: LRS  # patched
+            allowBlobPublicAccess: false
+            minTlsVersion: TLS1_2
+            enableHttpsTrafficOnly: true
+            resourceGroupNameRef:
+              name: ""                # patched to "<claim-name>-rg" — waits for RG to be Ready
+          providerConfigRef:
+            name: default
+          writeConnectionSecretToRef:
+            namespace: crossplane-system
+            name: placeholder         # patched to "<claim-name>-sa-conn"
+      patches:
+        # Kubernetes CR name → "<claim-name>-sa"
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: metadata.name
+          transforms:
+            - type: string
+              string:
+                type: Format
+                fmt: "%s-sa"
+
+        # Azure resource name (external-name) = user-provided storageAccountName
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.storageAccountName
+          toFieldPath: metadata.annotations[crossplane.io/external-name]
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.location
+          toFieldPath: spec.forProvider.location
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.tier
+          toFieldPath: spec.forProvider.accountTier
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.replicationType
+          toFieldPath: spec.forProvider.accountReplicationType
+
+        # Reference the RG managed resource — Crossplane will wait for it to be Ready
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: spec.forProvider.resourceGroupNameRef.name
+          transforms:
+            - type: string
+              string:
+                type: Format
+                fmt: "%s-rg"
+
+        # Connection secret name → "<claim-name>-sa-conn" in crossplane-system
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: spec.writeConnectionSecretToRef.name
+          transforms:
+            - type: string
+              string:
+                type: Format
+                fmt: "%s-sa-conn"
+
+      # Publish storage account credentials to the XR connection secret,
+      # which Crossplane then propagates to the Claim's writeConnectionSecretToRef.
+      connectionDetails:
+        - fromConnectionSecretKey: primaryAccessKey
+          toConnectionSecretKey: primaryAccessKey
+        - fromConnectionSecretKey: primaryQueueConnectionString
+          toConnectionSecretKey: primaryQueueConnectionString
+
+    # ── 3. Storage Queue ──────────────────────────────────────────────────────
+    - name: storage-queue
+      base:
+        apiVersion: storage.azure.upbound.io/v1beta1
+        kind: Queue
+        spec:
+          forProvider:
+            storageAccountNameRef:
+              name: ""     # patched to "<claim-name>-sa" — waits for SA to be Ready
+            resourceGroupName: ""  # patched to "<claim-name>-rg" (plain string)
+          providerConfigRef:
+            name: default
+      patches:
+        # Kubernetes CR name → "<claim-name>-queue"
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: metadata.name
+          transforms:
+            - type: string
+              string:
+                type: Format
+                fmt: "%s-queue"
+
+        # Azure resource name (external-name) → "<claim-name>-queue"
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: metadata.annotations[crossplane.io/external-name]
+          transforms:
+            - type: string
+              string:
+                type: Format
+                fmt: "%s-queue"
+
+        # Reference the SA managed resource — Crossplane will wait for it to be Ready
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: spec.forProvider.storageAccountNameRef.name
+          transforms:
+            - type: string
+              string:
+                type: Format
+                fmt: "%s-sa"
+
+        # Resource group name (plain string — Queue schema may not support nameRef)
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: spec.forProvider.resourceGroupName
+          transforms:
+            - type: string
+              string:
+                type: Format
+                fmt: "%s-rg"

@@ -1,0 +1,18 @@
+---
+# Only patches sourceRef — path ./crossplane/compositions is the same for all environments.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: crossplane-compositions
+  namespace: flux-system
+spec:
+  interval: 5m0s
+  path: ./crossplane/compositions
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: crossplane-config
+  wait: true
+  timeout: 5m
