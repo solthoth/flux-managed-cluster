@@ -50,7 +50,7 @@ kubectl create secret generic azure-sp-creds \
   --namespace=crossplane-system \
   --from-literal=credentials='{"clientId":"...","clientSecret":"...","tenantId":"...","subscriptionId":"...","activeDirectoryEndpointUrl":"https://login.microsoftonline.com","resourceManagerEndpointUrl":"https://management.azure.com/","activeDirectoryGraphResourceId":"https://graph.windows.net/","sqlManagementEndpointUrl":"https://management.core.windows.net:8443/","galleryEndpointUrl":"https://gallery.azure.com/","managementEndpointUrl":"https://management.core.windows.net/"}' \
   --dry-run=client -o yaml \
-  | sops --encrypt --input-type=yaml --output-type=yaml /dev/stdin \
+  | sops --encrypt --input-type=yaml --output-type=yaml --filename-override crossplane/overlays/kind/config/azure-sp.enc.yaml /dev/stdin \
   > crossplane/overlays/kind/config/azure-sp.enc.yaml
 ```
 
@@ -58,6 +58,12 @@ Create the age secret in the cluster:
 
 ```zsh
 kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey=./age.agekey
+```
+
+Or using local key:
+
+```zsh
+kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey=$HOME/.config/sops/age/keys.txt
 ```
 
 ### Terraform (Azure SP provisioning)

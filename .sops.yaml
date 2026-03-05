@@ -1,3 +1,6 @@
 creation_rules:
   - path_regex: crossplane/overlays/.*/config/.*\.enc\.yaml$
     age: age134y3sep4pwznj8y5szwyds98y2szgdevyvvxu475xkex8cfnudzqyj67dm
+stores:
+  yaml:
+    indent: 2
