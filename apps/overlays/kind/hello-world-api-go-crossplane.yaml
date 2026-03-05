@@ -16,11 +16,3 @@ spec:
     name: hello-world-api-go
   dependsOn:
     - name: crossplane-compositions
-  patches:
-    - patch: |-
-        - op: add
-          path: /metadata/namespace
-          value: app-solthoth-hello-world-api-go
-      target:
-        kind: StorageQueue
-        name: hello-world-api-queue
