@@ -1,7 +1,8 @@
 ---
 # Applies the Crossplane StorageQueue claim from the hello-world-api-go app repo.
-# The app's claim has no namespace set, so we inject it here via a patch.
-# The connection secret (hello-world-api-queue-conn) will be written to the app's namespace.
+# Depends on hello-world-api-go so ArgoCD has deployed the app (and created its namespace)
+# before the claim is applied. The connection secret (hello-world-api-queue-conn) will be
+# written to app-solthoth-hello-world-api-go once Azure provisioning completes.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -16,3 +17,4 @@ spec:
     name: hello-world-api-go
   dependsOn:
     - name: crossplane-compositions
+    - name: hello-world-api-go
