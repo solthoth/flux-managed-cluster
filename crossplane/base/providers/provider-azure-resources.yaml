@@ -8,7 +8,6 @@ metadata:
   name: upbound-provider-azure-resources
 spec:
   package: xpkg.upbound.io/upbound/provider-azure-resources:v1.9.0
-  installPolicy: Automatic
   revisionActivationPolicy: Automatic
   revisionHistoryLimit: 1
   packagePullPolicy: IfNotPresent

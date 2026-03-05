@@ -8,7 +8,6 @@ metadata:
   name: upbound-provider-family-azure
 spec:
   package: xpkg.upbound.io/upbound/provider-family-azure:v1.9.0
-  installPolicy: Automatic
   revisionActivationPolicy: Automatic
   revisionHistoryLimit: 1
   packagePullPolicy: IfNotPresent

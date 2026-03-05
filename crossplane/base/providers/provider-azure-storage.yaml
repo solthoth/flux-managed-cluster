@@ -7,7 +7,6 @@ metadata:
   name: upbound-provider-azure-storage
 spec:
   package: xpkg.upbound.io/upbound/provider-azure-storage:v1.9.0
-  installPolicy: Automatic
   revisionActivationPolicy: Automatic
   revisionHistoryLimit: 1
   packagePullPolicy: IfNotPresent
