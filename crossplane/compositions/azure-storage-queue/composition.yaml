@@ -129,10 +129,12 @@ spec:
       # Publish storage account credentials to the XR connection secret,
       # which Crossplane then propagates to the Claim's writeConnectionSecretToRef.
       connectionDetails:
-        - fromConnectionSecretKey: primaryAccessKey
-          toConnectionSecretKey: primaryAccessKey
-        - fromConnectionSecretKey: primaryQueueConnectionString
-          toConnectionSecretKey: primaryQueueConnectionString
+        - type: FromConnectionSecretKey
+          name: primaryAccessKey
+          fromConnectionSecretKey: primaryAccessKey
+        - type: FromConnectionSecretKey
+          name: primaryQueueConnectionString
+          fromConnectionSecretKey: primaryQueueConnectionString
 
     # ── 3. Storage Queue ──────────────────────────────────────────────────────
     - name: storage-queue
