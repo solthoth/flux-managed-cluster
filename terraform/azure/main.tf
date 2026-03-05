@@ -50,11 +50,15 @@ resource "azuread_service_principal_password" "crossplane" {
 }
 
 # --------------------------------------------------------------------------- #
-# Role assignment — Contributor on the Resource Group                          #
+# Role assignment — Contributor on the Subscription                            #
+#                                                                               #
+# Scoped to the subscription so Crossplane can create new Resource Groups      #
+# per claim (e.g. demo-queue-rg, hello-world-api-queue-rg). A resource-group-  #
+# scoped role cannot grant permission to create sibling resource groups.       #
 # --------------------------------------------------------------------------- #
 
 resource "azurerm_role_assignment" "crossplane_contributor" {
-  scope                = azurerm_resource_group.crossplane.id
+  scope                = data.azurerm_subscription.current.id
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.crossplane.object_id
 }
