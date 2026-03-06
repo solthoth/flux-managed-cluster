@@ -141,7 +141,7 @@ spec:
             - type: string
               string:
                 type: TrimSuffix
-                suffix: "-sa"
+                trim: "-sa"
             - type: string
               string:
                 type: Format
