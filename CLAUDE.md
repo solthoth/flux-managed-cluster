@@ -45,10 +45,23 @@ kubectl get xstoragequeues,storagequeues -A                   # Crossplane compo
 
 ### SOPS: encrypt a new secret
 
+Using string literal
+
 ```zsh
 kubectl create secret generic azure-sp-creds \
   --namespace=crossplane-system \
   --from-literal=credentials='{"clientId":"...","clientSecret":"...","tenantId":"...","subscriptionId":"...","activeDirectoryEndpointUrl":"https://login.microsoftonline.com","resourceManagerEndpointUrl":"https://management.azure.com/","activeDirectoryGraphResourceId":"https://graph.windows.net/","sqlManagementEndpointUrl":"https://management.core.windows.net:8443/","galleryEndpointUrl":"https://gallery.azure.com/","managementEndpointUrl":"https://management.core.windows.net/"}' \
+  --dry-run=client -o yaml \
+  | sops --encrypt --input-type=yaml --output-type=yaml --filename-override crossplane/overlays/kind/config/azure-sp.enc.yaml /dev/stdin \
+  > crossplane/overlays/kind/config/azure-sp.enc.yaml
+```
+
+Using JSON file
+
+```zsh
+kubectl create secret generic azure-sp-creds \
+  --namespace=crossplane-system \
+  --from-file=credentials=./terraform/azure/generated/azure-sp-creds.json \
   --dry-run=client -o yaml \
   | sops --encrypt --input-type=yaml --output-type=yaml --filename-override crossplane/overlays/kind/config/azure-sp.enc.yaml /dev/stdin \
   > crossplane/overlays/kind/config/azure-sp.enc.yaml

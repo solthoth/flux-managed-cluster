@@ -21,13 +21,3 @@ output "subscription_id" {
   value       = data.azurerm_subscription.current.subscription_id
   sensitive   = true
 }
-
-output "resource_group_name" {
-  description = "Resource Group name — set this in crossplane/overlays/<env>/azure-storage/storage-account.yaml"
-  value       = azurerm_resource_group.crossplane.name
-}
-
-output "location" {
-  description = "Azure region — set this in crossplane/overlays/<env>/azure-storage/storage-account.yaml"
-  value       = azurerm_resource_group.crossplane.location
-}

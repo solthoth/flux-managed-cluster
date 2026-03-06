@@ -8,6 +8,10 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~> 2.0"
     }
+    local = {
+      source = "hashicorp/local"
+      version = "~> 2.5"
+    }
   }
 }
 
@@ -23,15 +27,6 @@ provider "azuread" {}
 
 data "azurerm_subscription" "current" {}
 data "azuread_client_config" "current" {}
-
-# --------------------------------------------------------------------------- #
-# Resource Group                                                                #
-# --------------------------------------------------------------------------- #
-
-resource "azurerm_resource_group" "crossplane" {
-  name     = var.resource_group_name
-  location = var.location
-}
 
 # --------------------------------------------------------------------------- #
 # Service Principal                                                             #
@@ -61,4 +56,41 @@ resource "azurerm_role_assignment" "crossplane_contributor" {
   scope                = data.azurerm_subscription.current.id
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.crossplane.object_id
+}
+
+# --------------------------------------------------------------------------- #
+# Create a local sensitive file containing the Crossplane service principal   #
+# credentials                                                                 #
+#                                                                             #
+# This file is later encrypted using SOPS to produce a secure JSON file that  #
+# can be used by Crossplane to authenticate with Azure.                       #
+# --------------------------------------------------------------------------- #
+
+resource "local_sensitive_file" "crossplane_sp_plaintext" {
+  filename = local.plaintext_file
+  content  = local.crossplane_sp_json
+}
+
+resource "terraform_data" "encrypt_crossplane_sp" {
+  triggers_replace = {
+    content_sha = sha256(local.crossplane_sp_json)
+    out_file    = local.encrypted_file
+  }
+
+  depends_on = [local_sensitive_file.crossplane_sp_plaintext]
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command = <<-EOT
+      mkdir -p "${path.module}/generated"
+      SOPS_CONFIG="${path.module}/../../.sops.yaml" \
+      sops --encrypt \
+        --input-type json \
+        --output-type json \
+        --filename-override "${local.encrypted_file}" \
+        "${local.plaintext_file}" > "${local.encrypted_file}"
+
+      rm -f "${local.plaintext_file}"
+    EOT
+  }
 }
