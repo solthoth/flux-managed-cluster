@@ -3,3 +3,4 @@ kind: Kustomization
 
 resources:
   - hello-world-api.go.yaml
+  - super-demo-hello-api.yaml
