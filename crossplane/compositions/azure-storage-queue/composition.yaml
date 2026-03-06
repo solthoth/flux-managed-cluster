@@ -126,6 +126,30 @@ spec:
                 type: Format
                 fmt: "%s-sa-conn"
 
+        # ── Auto-wire XR writeConnectionSecretToRef ─────────────────────────
+        # Ensures the XR always has writeConnectionSecretToRef set on every
+        # reconciliation — self-healing even if the Claim was invalid at XR
+        # creation time (which causes Crossplane to skip the initial wiring).
+        #
+        # The SA's metadata.name is "{xr-name}-sa" (patched above), so we
+        # strip "-sa" and append "-conn" to derive the XR-level secret name.
+        # The namespace is copied from the SA's own base-spec value.
+        - type: ToCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: spec.writeConnectionSecretToRef.name
+          transforms:
+            - type: string
+              string:
+                type: TrimSuffix
+                suffix: "-sa"
+            - type: string
+              string:
+                type: Format
+                fmt: "%s-conn"
+        - type: ToCompositeFieldPath
+          fromFieldPath: spec.writeConnectionSecretToRef.namespace
+          toFieldPath: spec.writeConnectionSecretToRef.namespace
+
       # Publish storage account credentials to the XR connection secret,
       # which Crossplane then propagates to the Claim's writeConnectionSecretToRef.
       connectionDetails:
