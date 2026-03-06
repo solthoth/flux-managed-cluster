@@ -1,7 +1,0 @@
----
-# Namespace for the demo application team.
-# In a real environment this would be owned by the app team's namespace manifests.
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: demo-app

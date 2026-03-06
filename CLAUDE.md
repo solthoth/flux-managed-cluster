@@ -67,6 +67,8 @@ kubectl create secret generic azure-sp-creds \
   > crossplane/overlays/kind/config/azure-sp.enc.yaml
 ```
 
+_After creating `azure-sp.enc.yaml` ensure to push changes back into the remote repository for flux to consume on reconciliation._
+
 Create the age secret in the cluster:
 
 ```zsh
