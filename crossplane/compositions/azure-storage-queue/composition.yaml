@@ -183,15 +183,10 @@ spec:
                 type: Format
                 fmt: "%s-queue"
 
-        # Azure resource name (external-name) → "<claim-name>-queue"
+        # Azure resource name (external-name) = user-provided queueName
         - type: FromCompositeFieldPath
-          fromFieldPath: metadata.name
+          fromFieldPath: spec.parameters.queueName
           toFieldPath: metadata.annotations[crossplane.io/external-name]
-          transforms:
-            - type: string
-              string:
-                type: Format
-                fmt: "%s-queue"
 
         # Reference the SA managed resource — Crossplane will wait for it to be Ready
         - type: FromCompositeFieldPath

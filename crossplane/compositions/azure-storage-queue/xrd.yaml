@@ -41,6 +41,7 @@ spec:
                   required:
                     - location
                     - storageAccountName
+                    - queueName
                   properties:
                     location:
                       type: string
@@ -69,3 +70,12 @@ spec:
                         - ZRS
                         - RAGRS
                       default: LRS
+                    queueName:
+                      type: string
+                      description: >
+                        Azure Storage Queue name. Must be 3-63 characters,
+                        lowercase alphanumeric and hyphens only, cannot start
+                        or end with a hyphen.
+                      minLength: 3
+                      maxLength: 63
+                      pattern: "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"
